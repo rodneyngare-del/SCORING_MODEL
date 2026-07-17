@@ -12,5 +12,11 @@
     "lint": "npm run lint --workspace server && npm run lint --workspace client",
     "typecheck": "npm run typecheck --workspace server && npm run typecheck --workspace client",
     "test": "npm run test --workspace server && npm run test --workspace client"
+  },
+  "dependencies": {
+    "node-cron": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/node-cron": "^3.0.11"
   }
 }
