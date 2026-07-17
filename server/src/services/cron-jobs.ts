@@ -1,8 +1,8 @@
-import cron from "node-cron";
+import cron, { ScheduledTask } from "node-cron";
 import { prisma } from "../lib/prisma.js";
 import { syncIntegration } from "./integration.service.js";
 
-let syncJob: cron.ScheduledTask | null = null;
+let syncJob: ScheduledTask | null = null;
 
 export const startCronJobs = () => {
   const schedule = process.env.CRON_SCHEDULE ?? "0 0 */14 * *";
@@ -28,12 +28,15 @@ export const runSyncCron = async () => {
   console.log(`[Cron] Found ${configs.length} active client integrations to sync.`);
 
   // Find a system user to attribute the cron snapshot to (foreign key safety)
-  const systemUser = await prisma.user.findFirst({
-    where: { role: "ADMIN" },
-  }) ?? await prisma.user.findFirst();
+  const systemUser =
+    (await prisma.user.findFirst({
+      where: { role: "ADMIN" },
+    })) ?? (await prisma.user.findFirst());
 
   if (!systemUser) {
-    console.error("[Cron] Error: No users found in database to attribute the sync snapshots to.");
+    console.error(
+      "[Cron] Error: No users found in database to attribute the sync snapshots to."
+    );
     return;
   }
 
@@ -43,7 +46,10 @@ export const runSyncCron = async () => {
       await syncIntegration(config.clientId, systemUser.id);
       console.log(`[Cron] Sync succeeded for client ${config.clientId}`);
     } catch (err: any) {
-      console.error(`[Cron] Sync failed for client ${config.clientId}:`, err.message ?? err);
+      console.error(
+        `[Cron] Sync failed for client ${config.clientId}:`,
+        err.message ?? err
+      );
     }
   }
 };
